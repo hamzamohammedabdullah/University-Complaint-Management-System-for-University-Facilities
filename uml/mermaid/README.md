@@ -11,7 +11,7 @@ Files:
 - `complaint_lifecycle.mmd` — statechart for complaint lifecycle
 
 Render options:
-- VS Code: install the 'Markdown Preview Mermaid Support' or 'Mermaid Preview' extensions and open the `.mmd` file.
+1. VS Code: install the 'Markdown Preview Mermaid Support' or 'Mermaid Preview' extensions and open the `.mmd` file.
 - CLI: install `@mermaid-js/mermaid-cli` (node) and run:
 
 ```powershell
@@ -22,3 +22,4 @@ mmdc -i accounts_class.mmd -o accounts_class.png
 If you need SVG or PDF output, mmdc supports `-t` and `-w` flags; see Mermaid CLI docs.
 
 If you want, I can render these into PNG/SVG here (requires installing Node/npm dependencies) and include them in the `uml/output/` folder.
+2. Open mermaid.live on your browser, copy and paste the individual codes to get the rendered image
