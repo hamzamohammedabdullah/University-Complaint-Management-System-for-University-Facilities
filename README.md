@@ -1,9 +1,9 @@
-# 🏫 UniCMS — Web-Based Complaint Management System for University Facilities
+# UniCMS — Web-Based Complaint Management System for University Facilities
 ### Django + SQLite + Bootstrap 5 | Group 8 — BSc Computer Science
 
 ---
 
-## ⚙️ Tech Stack
+##  Tech Stack
 
 | Layer      | Technology              |
 |------------|-------------------------|
@@ -17,7 +17,7 @@
 
 ---
 
-## 🚀 Setup (3 steps only)
+##  Setup (3 steps only)
 
 ### What you need installed first:
 - **Python 3.10+** → https://www.python.org/downloads/
@@ -66,7 +66,7 @@ Open your browser at **http://127.0.0.1:8000** 🎉
 
 ---
 
-## 👤 User Roles & How to Create Them
+##  User Roles & How to Create Them
 
 | Role      | How to create                               | What they can do                              |
 |-----------|---------------------------------------------|-----------------------------------------------|
@@ -81,7 +81,7 @@ To create staff accounts:
 
 ---
 
-## 📋 URL Reference
+##  URL Reference
 
 | URL                        | Page                    | Access       |
 |----------------------------|-------------------------|--------------|
@@ -102,7 +102,7 @@ To create staff accounts:
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 unicms-django/
@@ -135,7 +135,7 @@ unicms-django/
 
 ---
 
-## 🗺 Complaint Lifecycle
+## Complaint Lifecycle
 
 ```
 Submitted → Under Review → Assigned → In Progress → Resolved → Closed
@@ -145,7 +145,7 @@ Submitted → Under Review → Assigned → In Progress → Resolved → Closed
 
 ---
 
-## 🔒 Security Features
+## Security Features
 
 - Django's built-in CSRF protection on all forms
 - Session-based authentication
@@ -156,9 +156,8 @@ Submitted → Under Review → Assigned → In Progress → Resolved → Closed
 
 ---
 
-## 🔮 Future Enhancements (Chapter 5)
+## Future Enhancements (Chapter 5)
 
-- [ ] Email notifications (Django + SMTP)
 - [ ] Mobile-responsive improvements
 - [ ] AI complaint auto-classification (NLP)
 - [ ] REST API with Django REST Framework
@@ -166,4 +165,4 @@ Submitted → Under Review → Assigned → In Progress → Resolved → Closed
 
 ---
 
-## 👨‍💻 Group 8 — BSc Computer Science | 2025
+##  Group 8 — BSc Computer Science | 2025
