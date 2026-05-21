@@ -1,0 +1,65 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Create Account{% endblock %}
+
+{% block auth_content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-4" style="background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%);">
+  <div class="card shadow-lg border-0" style="width:100%; max-width:500px; border-radius:16px;">
+    <div class="card-body p-5">
+      <div class="text-center mb-4">
+        <div style="font-size:36px;">🏫</div>
+        <h4 class="fw-bold text-primary">UniCMS</h4>
+        <small class="text-muted">University Complaint Management System</small>
+      </div>
+      <h5 class="fw-bold mb-1">Create Account</h5>
+      <p class="text-muted small mb-4">Register as a student to submit facility complaints</p>
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label fw-semibold small">First Name *</label>
+            <input type="text" name="first_name" class="form-control" placeholder="Kwame" value="{{ form.first_name.value|default:'' }}" required />
+            {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold small">Last Name *</label>
+            <input type="text" name="last_name" class="form-control" placeholder="Mensah" value="{{ form.last_name.value|default:'' }}" required />
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold small">Username *</label>
+            <input type="text" name="username" class="form-control" placeholder="kwame.mensah" value="{{ form.username.value|default:'' }}" required />
+            {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold small">Student ID</label>
+            <input type="text" name="student_id" class="form-control" placeholder="UG0574822" value="{{ form.student_id.value|default:'' }}" />
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold small">University Email *</label>
+            <input type="email" name="email" class="form-control" placeholder="you@st.ubids.edu.gh" value="{{ form.email.value|default:'' }}" required />
+            {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold small">Phone Number</label>
+            <input type="tel" name="phone" class="form-control" placeholder="+233 XX XXX XXXX" value="{{ form.phone.value|default:'' }}" />
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold small">Password *</label>
+            <input type="password" name="password1" class="form-control" placeholder="Min. 6 characters" required />
+            {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors.0 }}</div>{% endif %}
+          </div>
+          <div class="col-6">
+            <label class="form-label fw-semibold small">Confirm Password *</label>
+            <input type="password" name="password2" class="form-control" placeholder="Re-enter password" required />
+            {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors.0 }}</div>{% endif %}
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 fw-semibold mt-4">Create Account</button>
+      </form>
+      <p class="text-center text-muted small mt-3 mb-0">
+        Already have an account? <a href="{% url 'login' %}">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

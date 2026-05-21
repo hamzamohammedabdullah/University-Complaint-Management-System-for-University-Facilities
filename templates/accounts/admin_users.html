@@ -1,0 +1,70 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h4 class="fw-bold mb-0">Manage Users</h4>
+    <p class="text-muted small mb-0">Manage student, staff and administrator accounts</p>
+  </div>
+  <a href="{% url 'create_user' %}" class="btn btn-primary">
+    <i class="bi bi-person-plus me-1"></i> Add User
+  </a>
+</div>
+
+<!-- Filter tabs -->
+<div class="d-flex gap-2 mb-3">
+  <a href="{% url 'admin_users' %}" class="btn btn-sm {% if not role_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}">All Users</a>
+  <a href="{% url 'admin_users' %}?role=student" class="btn btn-sm {% if role_filter == 'student' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Students</a>
+  <a href="{% url 'admin_users' %}?role=staff"   class="btn btn-sm {% if role_filter == 'staff'   %}btn-primary{% else %}btn-outline-secondary{% endif %}">Staff</a>
+  <a href="{% url 'admin_users' %}?role=admin"   class="btn btn-sm {% if role_filter == 'admin'   %}btn-primary{% else %}btn-outline-secondary{% endif %}">Admins</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th class="small text-uppercase text-muted fw-semibold">Name</th>
+          <th class="small text-uppercase text-muted fw-semibold">Username</th>
+          <th class="small text-uppercase text-muted fw-semibold">Email</th>
+          <th class="small text-uppercase text-muted fw-semibold">Role</th>
+          <th class="small text-uppercase text-muted fw-semibold">Dept / Student ID</th>
+          <th class="small text-uppercase text-muted fw-semibold">Joined</th>
+          <th class="small text-uppercase text-muted fw-semibold">Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td class="fw-semibold small">{{ u.get_full_name|default:u.username }}</td>
+          <td class="small text-muted">{{ u.username }}</td>
+          <td class="small text-muted">{{ u.email }}</td>
+          <td><span class="badge bg-primary" style="text-transform:capitalize;">{{ u.role }}</span></td>
+          <td class="small text-muted">{{ u.department|default:u.student_id|default:"—" }}</td>
+          <td class="small text-muted">{{ u.date_joined|date:"d M Y" }}</td>
+          <td>
+            {% if u.is_active %}
+            <span class="badge bg-success">Active</span>
+            {% else %}
+            <span class="badge bg-secondary">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if u != request.user %}
+            <a href="{% url 'toggle_user' u.id %}" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+               onclick="return confirm('{% if u.is_active %}Deactivate{% else %}Activate{% endif %} {{ u.get_full_name }}?')">
+              {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No users found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

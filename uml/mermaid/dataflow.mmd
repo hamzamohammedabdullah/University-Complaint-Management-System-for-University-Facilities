@@ -1,0 +1,16 @@
+flowchart LR
+  UserInput[User Input]
+  FormValidation[Form Validation]
+  DB[(SQLite DB)]
+  Storage[Media Storage]
+  NotificationQueue[Notification Delivery]
+  Email[SMTP]
+  SMS[Twilio]
+
+  UserInput --> FormValidation
+  FormValidation -->|valid| DB
+  FormValidation -->|files| Storage
+  Storage --> DB
+  DB --> NotificationQueue
+  NotificationQueue --> Email
+  NotificationQueue --> SMS

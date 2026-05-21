@@ -1,0 +1,12 @@
+graph TD
+  subgraph DjangoApp[unicms Django Project]
+    A[Accounts App] -->|uses| DB[(SQLite db.sqlite3)]
+    B[Complaints App] -->|uses| DB
+    A --> Templates[Templates/Static]
+    B --> Templates
+  end
+  SMTP[Email (SMTP)]
+  Twilio[Twilio (SMS)]
+  B --> SMTP
+  B --> Twilio
+

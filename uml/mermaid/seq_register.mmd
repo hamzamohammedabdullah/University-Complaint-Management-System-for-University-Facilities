@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor User
+    participant Browser
+    participant Server
+    participant DB
+
+    User->>Browser: open /accounts/register
+    Browser->>Server: GET /accounts/register
+    Server-->>Browser: render registration form
+
+    User->>Browser: fill and submit form
+    Browser->>Server: POST /accounts/register
+    Server->>Server: validate form
+    alt valid
+        Server->>DB: create User
+        DB-->>Server: user instance
+        Server-->>Browser: login and redirect to dashboard
+    else invalid
+        Server-->>Browser: render form with validation errors
+    end

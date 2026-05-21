@@ -1,0 +1,18 @@
+%% Use-case diagram (Mermaid: simple flowchart approximating use-cases)
+flowchart LR
+  User((User))
+  Submit[Submit Complaint]
+  Dashboard[View Dashboard]
+  Profile[Edit Profile]
+  Triage[Triage / Assign]
+  UpdateStatus[Update Status]
+  ManageUsers[Manage Users]
+  Analytics[View Analytics]
+
+  User --> Submit
+  User --> Dashboard
+  User --> Profile
+  Triage <-- User
+  UpdateStatus <-- User
+  ManageUsers <-- User
+  Analytics <-- User

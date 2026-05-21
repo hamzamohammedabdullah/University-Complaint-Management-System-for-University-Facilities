@@ -1,0 +1,138 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-1">
+  <h4 class="fw-bold mb-0">Dashboard</h4>
+</div>
+<p class="text-muted small mb-4">Welcome back, {{ user.first_name|default:user.username }} — here's your overview</p>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  {% if user.is_student %}
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-lbl">My Complaints</div>
+      <div class="stat-val">{{ stats.total }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-lbl">Open</div>
+      <div class="stat-val text-warning">{{ stats.open }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-lbl">Resolved</div>
+      <div class="stat-val text-success">{{ stats.resolved }}</div>
+    </div>
+  </div>
+
+  {% elif user.is_staff_member %}
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-lbl">Assigned to Me</div>
+      <div class="stat-val">{{ stats.assigned }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-lbl">In Progress</div>
+      <div class="stat-val text-warning">{{ stats.in_progress }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-lbl">Resolved</div>
+      <div class="stat-val text-success">{{ stats.resolved }}</div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-lbl">Total</div>
+      <div class="stat-val">{{ stats.total }}</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-lbl">Pending</div>
+      <div class="stat-val text-warning">{{ stats.submitted }}</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-lbl">In Progress</div>
+      <div class="stat-val text-primary">{{ stats.in_progress }}</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-lbl">Resolved</div>
+      <div class="stat-val text-success">{{ stats.resolved }}</div>
+    </div>
+  </div>
+  <div class="col-md-2">
+    <div class="stat-card">
+      <div class="stat-lbl">Escalated</div>
+      <div class="stat-val text-danger">{{ stats.escalated }}</div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Quick action for students -->
+{% if user.is_student %}
+<div class="mb-4">
+  <a href="{% url 'submit_complaint' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-1"></i> Submit New Complaint
+  </a>
+</div>
+{% endif %}
+
+<!-- Recent Complaints -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+    <span class="fw-semibold">Recent Complaints</span>
+    <a href="{% url 'complaints_list' %}" class="small text-primary text-decoration-none">View all →</a>
+  </div>
+  {% if complaints %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th class="small text-uppercase text-muted fw-semibold">ID</th>
+          <th class="small text-uppercase text-muted fw-semibold">Category</th>
+          <th class="small text-uppercase text-muted fw-semibold">Location</th>
+          <th class="small text-uppercase text-muted fw-semibold">Status</th>
+          <th class="small text-uppercase text-muted fw-semibold">Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in complaints %}
+        <tr>
+          <td><code class="small bg-light px-2 py-1 rounded">{{ c.complaint_id }}</code></td>
+          <td class="small">{{ c.category }}</td>
+          <td class="small text-muted">{{ c.location|truncatechars:30 }}</td>
+          <td><span class="badge bg-{{ c.status_badge }}">{{ c.status }}</span></td>
+          <td class="small text-muted">{{ c.created_at|date:"d M Y" }}</td>
+          <td><a href="{% url 'complaint_detail' c.pk %}" class="btn btn-outline-secondary btn-sm">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-center py-5">
+    <i class="bi bi-file-earmark-text text-muted" style="font-size:40px;"></i>
+    <p class="text-muted mt-2 mb-0">No complaints yet</p>
+    {% if user.is_student %}
+    <a href="{% url 'submit_complaint' %}" class="btn btn-primary btn-sm mt-3">Submit your first complaint</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

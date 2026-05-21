@@ -1,0 +1,50 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h4 class="fw-bold mb-0">Notifications</h4>
+    <p class="text-muted small mb-0">{{ unread_count }} unread</p>
+  </div>
+  {% if unread_count %}
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="mark_all">
+    <button class="btn btn-outline-primary btn-sm" type="submit">Mark all as read</button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="card border-0 shadow-sm">
+  {% if notifications %}
+    {% for n in notifications %}
+    <div class="notif-item {% if not n.is_read %}unread{% endif %} d-flex justify-content-between align-items-start">
+      <div>
+        <div class="fw-semibold small">{{ n.title }}</div>
+        <div class="text-muted small mt-1">{{ n.message }}</div>
+        <div class="text-muted mt-1" style="font-size:11px;">{{ n.created_at|date:"d M Y, H:i" }}</div>
+        {% if n.complaint %}
+        <a href="{% url 'complaint_detail' n.complaint.pk %}" class="small text-primary text-decoration-none">
+          View complaint {{ n.complaint.complaint_id }} →
+        </a>
+        {% endif %}
+      </div>
+      {% if not n.is_read %}
+      <form method="post" class="ms-3 flex-shrink-0">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="mark_one">
+        <input type="hidden" name="notif_id" value="{{ n.id }}">
+        <button class="btn btn-sm btn-outline-secondary" type="submit">Mark read</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="card-body text-center py-5">
+    <i class="bi bi-bell-slash text-muted" style="font-size:36px;"></i>
+    <p class="text-muted mt-2 mb-0">No notifications yet</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

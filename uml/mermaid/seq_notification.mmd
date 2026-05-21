@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant System
+    participant Server
+    participant DB
+    participant SMTP
+    participant Twilio
+
+    System->>Server: add_notification(recipient, ...)
+    Server->>DB: create Notification (in-app)
+    DB-->>Server: saved notification
+    alt recipient.email
+        Server->>SMTP: send_mail(subject, message)
+        SMTP-->>Server: success/failure
+    end
+    alt recipient.phone
+        opt Twilio configured
+            Server->>Twilio: client.messages.create(...)
+            Twilio-->>Server: success/failure
+        else
+            Server-->>Server: log SMS (mock)
+        end
+    end

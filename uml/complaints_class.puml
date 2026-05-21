@@ -1,0 +1,60 @@
+@startuml
+title Complaints - Class Diagram
+package complaints {
+  class Complaint {
+    - id: int (pk)
+    - complaint_id: varchar (unique)
+    - category: varchar (choices)
+    - priority: varchar (choices)
+    - location: varchar
+    - building: varchar (blank)
+    - description: text
+    - status: varchar (choices)
+    - assigned_dept: varchar (blank)
+    - resolution_notes: text (blank)
+    - resolved_at: datetime (nullable)
+    - is_escalated: bool
+    - escalation_note: text (blank)
+    - created_at: datetime
+    - updated_at: datetime
+    + save()
+    + status_badge(): str
+    + priority_badge(): str
+  }
+
+  class ComplaintMedia {
+    - id: int (pk)
+    - file: FileField (uploads/%Y/%m/)
+    - original_name: varchar
+    - uploaded_at: datetime
+    + is_image(): bool
+  }
+
+  class AuditLog {
+    - id: int (pk)
+    - actor_name: varchar
+    - action: varchar
+    - previous_status: varchar
+    - new_status: varchar
+    - notes: text
+    - timestamp: datetime
+  }
+
+  class Notification {
+    - id: int (pk)
+    - title: varchar
+    - message: text
+    - notif_type: varchar (choices)
+    - is_read: bool
+    - created_at: datetime
+  }
+}
+
+Complaint "1" --> "*" ComplaintMedia : media_files
+Complaint "1" --> "*" AuditLog : audit_logs
+Complaint "1" --> "*" Notification : complaints
+Complaint o-- User : student
+Complaint o-- User : assigned_to
+Notification --> User : recipient
+
+@enduml

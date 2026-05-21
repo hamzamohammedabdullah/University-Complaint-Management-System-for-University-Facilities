@@ -1,0 +1,27 @@
+@startuml
+title Accounts - Class Diagram
+package accounts {
+  class User {
+    - id: int (pk)
+    - username: varchar
+    - email: varchar
+    - first_name: varchar
+    - last_name: varchar
+    - role: varchar (choices)
+    - student_id: varchar (blank)
+    - department: varchar (choices, blank)
+    - phone: varchar (blank)
+    - is_active: bool
+    - date_joined: datetime
+    + is_student(): bool
+    + is_staff_member(): bool
+    + is_admin(): bool
+    + __str__(): str
+  }
+}
+
+User --> "*" Complaint : student
+User --> "*" Complaint : assigned_to
+User --> "*" Notification : recipient
+
+@enduml

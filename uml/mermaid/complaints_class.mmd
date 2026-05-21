@@ -1,0 +1,49 @@
+classDiagram
+class Complaint {
+  +int id
+  +String complaint_id
+  +String category
+  +String priority
+  +String location
+  +String building
+  +Text description
+  +String status
+  +String assigned_dept
+  +Text resolution_notes
+  +datetime resolved_at
+  +bool is_escalated
+  +Text escalation_note
+  +datetime created_at
+  +datetime updated_at
+}
+
+class ComplaintMedia {
+  +int id
+  +File file
+  +String original_name
+  +datetime uploaded_at
+}
+
+class AuditLog {
+  +int id
+  +String actor_name
+  +String action
+  +String previous_status
+  +String new_status
+  +Text notes
+  +datetime timestamp
+}
+
+class Notification {
+  +int id
+  +String title
+  +Text message
+  +String notif_type
+  +bool is_read
+  +datetime created_at
+}
+
+Complaint "1" --> "*" ComplaintMedia : media_files
+Complaint "1" --> "*" AuditLog : audit_logs
+Complaint "1" --> "*" Notification : notifications
+Notification "*" --> "1" User : recipient

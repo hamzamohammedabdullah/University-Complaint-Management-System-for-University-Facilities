@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor User
+    participant Browser
+    participant Server
+    participant Auth
+
+    User->>Browser: open /accounts/login
+    Browser->>Server: GET /accounts/login
+    Server-->>Browser: render login form
+
+    User->>Browser: submit credentials
+    Browser->>Server: POST /accounts/login
+    Server->>Auth: authenticate(credentials)
+    alt valid
+        Auth-->>Server: return user
+        Server-->>Browser: redirect to dashboard
+    else invalid
+        Auth-->>Server: None
+        Server-->>Browser: render form with error
+    end

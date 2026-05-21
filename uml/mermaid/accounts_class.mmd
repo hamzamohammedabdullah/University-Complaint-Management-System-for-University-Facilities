@@ -1,0 +1,27 @@
+classDiagram
+class User {
+  +int id
+  +String username
+  +String email
+  +String first_name
+  +String last_name
+  +String role
+  +String student_id
+  +String department
+  +String phone
+  +bool is_active
+  +datetime date_joined
+  +is_student()
+  +is_staff_member()
+  +is_admin()
+}
+
+class Complaint
+class Notification
+class ComplaintMedia
+
+User "1" --> "*" Complaint : student
+User "0..1" --> "*" Complaint : assigned_to
+User "1" --> "*" Notification : recipient
+Complaint "1" *-- "0..*" ComplaintMedia : media_files
+Complaint "1" --> "*" Notification : notifications

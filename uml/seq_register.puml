@@ -1,0 +1,25 @@
+@startuml
+title Registration Sequence (including validation)
+actor User
+participant Browser
+participant Server
+participant DB
+
+User -> Browser: Open /accounts/register/
+Browser -> Server: GET /accounts/register/
+Server -> Browser: render registration form
+
+User -> Browser: Fill form and submit
+Browser -> Server: POST /accounts/register/
+Server -> Server: form.is_valid()
+alt valid
+	Server -> DB: create User (save)
+	DB --> Server: user instance
+	Server -> Server: login(user)
+	Server -> Browser: redirect to dashboard
+else invalid
+	Server -> Browser: render form with errors
+	Browser -> User: show validation messages
+end
+
+@enduml

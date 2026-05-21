@@ -1,0 +1,9 @@
+stateDiagram-v2
+  [*] --> Submitted
+  Submitted --> Under_Review: review
+  Under_Review --> Assigned: assign
+  Assigned --> In_Progress: start
+  In_Progress --> Resolved: resolve
+  Resolved --> Closed: close
+  In_Progress --> Escalated: escalate
+  Escalated --> In_Progress: reassigned

@@ -1,0 +1,84 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+<h4 class="fw-bold mb-1">Admin Analytics</h4>
+<p class="text-muted small mb-4">System overview and complaint statistics</p>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+  <div class="col-md-2"><div class="stat-card"><div class="stat-lbl">Total</div><div class="stat-val">{{ stats.total }}</div></div></div>
+  <div class="col-md-2"><div class="stat-card"><div class="stat-lbl">Pending</div><div class="stat-val text-warning">{{ stats.submitted }}</div></div></div>
+  <div class="col-md-2"><div class="stat-card"><div class="stat-lbl">In Progress</div><div class="stat-val text-primary">{{ stats.in_progress }}</div></div></div>
+  <div class="col-md-2"><div class="stat-card"><div class="stat-lbl">Resolved</div><div class="stat-val text-success">{{ stats.resolved }}</div></div></div>
+  <div class="col-md-2"><div class="stat-card"><div class="stat-lbl">Closed</div><div class="stat-val text-secondary">{{ stats.closed }}</div></div></div>
+  <div class="col-md-2"><div class="stat-card"><div class="stat-lbl">Escalated</div><div class="stat-val text-danger">{{ stats.escalated }}</div></div></div>
+</div>
+
+<div class="row g-4">
+  <!-- Status Pie Chart -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold py-3">Complaints by Status</div>
+      <div class="card-body">
+        <canvas id="statusChart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Bar Chart -->
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold py-3">Complaints by Category</div>
+      <div class="card-body">
+        <canvas id="categoryChart" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent complaints table -->
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+        <span class="fw-semibold">All Complaints</span>
+        <a href="{% url 'complaints_list' %}" class="btn btn-outline-primary btn-sm">View Full List</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  const statusData   = {{ by_status|safe }};
+  const categoryData = {{ by_category|safe }};
+
+  const COLORS = ['#2563eb','#16a34a','#d97706','#dc2626','#0891b2','#7c3aed','#64748b'];
+
+  // Status Pie
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: statusData.map(d => d.status),
+      datasets: [{ data: statusData.map(d => d.count), backgroundColor: COLORS, borderWidth: 2 }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } }, cutout: '60%' }
+  });
+
+  // Category Bar
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'bar',
+    data: {
+      labels: categoryData.map(d => d.category),
+      datasets: [{ label: 'Complaints', data: categoryData.map(d => d.count),
+        backgroundColor: '#2563eb', borderRadius: 6 }]
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+</script>
+{% endblock %}

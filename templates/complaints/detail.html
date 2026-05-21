@@ -1,0 +1,175 @@
+{% extends 'layouts/base.html' %}
+{% block title %}{{ complaint.complaint_id }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{% url 'complaints_list' %}" class="btn btn-outline-secondary btn-sm">← Back</a>
+  <div>
+    <h4 class="fw-bold mb-1">{{ complaint.complaint_id }}</h4>
+    <div class="d-flex gap-2">
+      <span class="badge bg-{{ complaint.status_badge }}">{{ complaint.status }}</span>
+      <span class="badge bg-{{ complaint.priority_badge }}">{{ complaint.priority }}</span>
+      {% if complaint.is_escalated %}<span class="badge bg-danger">⚠ Escalated</span>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left column -->
+  <div class="col-lg-8">
+
+    <!-- Details -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold py-3">Complaint Details</div>
+      <div class="card-body">
+        <div class="row g-3">
+          {% for label, value in details_list %}
+          <div class="col-md-6">
+            <div class="small text-uppercase text-muted fw-semibold" style="letter-spacing:.5px;">{{ label }}</div>
+            <div class="mt-1">{{ value|default:"—" }}</div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <hr>
+        <div class="small text-uppercase text-muted fw-semibold mb-2" style="letter-spacing:.5px;">Description</div>
+        <p class="mb-0" style="white-space:pre-wrap; line-height:1.7;">{{ complaint.description }}</p>
+
+        {% if complaint.resolution_notes %}
+        <div class="alert alert-success mt-3 mb-0">
+          <div class="small fw-semibold mb-1">✅ Resolution Notes</div>
+          <p class="mb-0 small">{{ complaint.resolution_notes }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Media -->
+    {% if media_files %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold py-3">Attachments</div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-3">
+          {% for f in media_files %}
+            {% if f.is_image %}
+            <a href="{{ f.file.url }}" target="_blank">
+              <img src="{{ f.file.url }}" alt="{{ f.original_name }}" class="rounded border" style="width:90px; height:90px; object-fit:cover;">
+            </a>
+            {% else %}
+            <a href="{{ f.file.url }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-paperclip"></i> {{ f.original_name|truncatechars:20 }}
+            </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Timeline -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold py-3">Complaint Timeline</div>
+      <div class="card-body">
+        <ul class="timeline">
+          {% for log in audit_logs %}
+          <li>
+            <div class="fw-semibold small">{{ log.action }}</div>
+            <div class="text-muted" style="font-size:11px;">by {{ log.actor_name }} · {{ log.timestamp|date:"d M Y, H:i" }}</div>
+            {% if log.notes %}<div class="bg-light rounded p-2 mt-1 small">{{ log.notes }}</div>{% endif %}
+          </li>
+          {% empty %}
+          <li><span class="text-muted small">No activity recorded yet.</span></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right column — actions -->
+  {% if user.is_staff_member or user.is_admin %}
+  <div class="col-lg-4">
+
+    <!-- Update Status -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold py-3">Update Status</div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_status">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">New Status</label>
+            {{ status_form.status }}
+          </div>
+          <div class="mb-3" id="resolution-section" style="display:none;">
+            <label class="form-label small fw-semibold">Resolution Notes</label>
+            {{ status_form.resolution_notes }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Internal Notes</label>
+            {{ status_form.notes }}
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm w-100">Save Update</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Assign (admin only) -->
+    {% if user.is_admin %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold py-3">Assign to Staff</div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="assign">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Select Staff Member</label>
+            <select name="staff_id" class="form-select form-select-sm">
+              <option value="">— Select staff —</option>
+              {% for s in staff_list %}
+              <option value="{{ s.id }}" {% if complaint.assigned_to == s %}selected{% endif %}>
+                {{ s.get_full_name }} ({{ s.department }})
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Notes</label>
+            <textarea name="notes" class="form-control form-control-sm" rows="2" placeholder="Optional..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-success btn-sm w-100">Assign & Notify</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Escalate -->
+    {% if not complaint.is_escalated %}
+    <div class="card border-0 shadow-sm border-danger">
+      <div class="card-header bg-white fw-semibold py-3 text-danger">Escalate Complaint</div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="escalate">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Reason for Escalation</label>
+            <textarea name="escalation_note" class="form-control form-control-sm" rows="3" placeholder="Explain why this complaint is being escalated..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-danger btn-sm w-100">⚠ Escalate</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  // Show resolution notes when status = Resolved
+  document.querySelector('[name=status]')?.addEventListener('change', function() {
+    document.getElementById('resolution-section').style.display = this.value === 'Resolved' ? 'block' : 'none';
+  });
+</script>
+{% endblock %}

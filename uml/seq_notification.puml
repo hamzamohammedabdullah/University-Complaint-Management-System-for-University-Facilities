@@ -1,0 +1,31 @@
+@startuml
+title Notification Delivery Sequence (email + SMS fallback)
+actor System
+participant Server
+participant DB
+participant SMTP
+participant Twilio
+
+System -> Server: add_notification(recipient, complaint, title, message)
+Server -> DB: create Notification (in-app)
+DB --> Server: notification saved
+Server -> Server: import delivery helpers
+alt recipient.email available
+  Server -> SMTP: send_mail(subject, message, from, [recipient_email])
+  alt email sent
+    SMTP --> Server: success
+  else failure
+    SMTP --> Server: failure (logged)
+  end
+end
+alt recipient.phone available
+  alt Twilio configured
+    Server -> Twilio: client.messages.create(body, from_, to)
+    Twilio --> Server: success/failure
+  else Twilio not configured
+    Server -> Server: log SMS (mock delivery)
+  end
+end
+Server --> System: return (email_sent, sms_sent)
+
+@enduml
