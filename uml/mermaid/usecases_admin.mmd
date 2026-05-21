@@ -1,0 +1,16 @@
+%% Admin use-case diagram (Mermaid)
+flowchart LR
+  Admin((Admin))
+  ManageUsers[Manage Users]
+  ViewAnalytics[View Analytics]
+  Triage[Triage / Assign Complaints]
+  ManageComplaints[Manage Complaints]
+  Resolve[Resolve / Close Complaint]
+  Notifications[Send/Configure Notifications]
+
+  Admin --> ManageUsers
+  Admin --> ViewAnalytics
+  Admin --> Triage
+  Admin --> ManageComplaints
+  Admin --> Resolve
+  Admin --> Notifications
