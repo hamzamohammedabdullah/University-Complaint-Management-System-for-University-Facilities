@@ -166,3 +166,83 @@ Submitted → Under Review → Assigned → In Progress → Resolved → Closed
 ---
 
 ##  Group 8 — BSc Computer Science | 2025
+
+---
+
+## Email (SMTP) setup
+
+The app uses Django's email backend to send notification emails. You can configure SMTP in `unicms/settings.py` (recommended: use environment variables for secrets).
+
+Example (Gmail / SMTP) — add to `settings.py` or load from env:
+
+```python
+import os
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')  # use app password
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'no-reply@example.com')
+```
+
+Development tip: to avoid sending real email during development, use the console backend:
+
+```python
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+```
+
+Test sending an email from Django shell:
+
+```bash
+python manage.py shell
+```
+```python
+from django.core.mail import send_mail
+send_mail('Test email', 'This is a test', 'from@example.com', ['you@example.com'])
+```
+
+Security notes:
+- Prefer environment variables or a secrets manager for credentials (do not commit passwords to VCS).
+- For Gmail use an App Password (if using 2FA) rather than your main account password.
+- Ensure your SMTP provider allows sending from the configured `DEFAULT_FROM_EMAIL`.
+
+---
+
+## Twilio (SMS) setup
+
+Twilio is used for optional SMS notifications. Configure the credentials as environment variables and add them to `unicms/settings.py`:
+
+```python
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER')  # E.164 format, e.g. +15551234567
+```
+
+Install the Twilio client (if not already installed):
+
+```bash
+pip install twilio
+```
+
+Test sending an SMS from Django shell:
+
+```bash
+python manage.py shell
+```
+```python
+from twilio.rest import Client
+import os
+sid = os.environ.get('TWILIO_ACCOUNT_SID')
+token = os.environ.get('TWILIO_AUTH_TOKEN')
+from_num = os.environ.get('TWILIO_FROM_NUMBER')
+client = Client(sid, token)
+client.messages.create(body='Test message', from_=from_num, to='+19995551234')
+```
+
+Notes:
+- The notification code falls back to logging SMS if Twilio is not configured; adding these env vars enables real delivery.
+- Confirm your Twilio account has an active phone number and sufficient balance (if using paid numbers).
+- Keep Twilio credentials secret — store them in environment variables or secrets management.
+
