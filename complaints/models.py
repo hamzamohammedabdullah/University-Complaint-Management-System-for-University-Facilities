@@ -29,7 +29,7 @@ class Complaint(models.Model):
     ]
 
     complaint_id     = models.CharField(max_length=30, unique=True, editable=False)
-    student          = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='complaints')
+    submitter        = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='complaints')
     category         = models.CharField(max_length=30, choices=CATEGORY_CHOICES)
     priority         = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='Medium')
     location         = models.CharField(max_length=200)

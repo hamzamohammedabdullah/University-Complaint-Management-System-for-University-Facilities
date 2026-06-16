@@ -3,7 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Count, Q
 from django.utils import timezone
+from datetime import datetime
 from django.db.utils import OperationalError
+from django.http import HttpResponse
+import csv
 from accounts.models import User
 from .models import Complaint, ComplaintMedia, AuditLog, Notification
 from .forms import SubmitComplaintForm, UpdateStatusForm, AssignComplaintForm
@@ -19,7 +22,7 @@ def add_notification(recipient, complaint, title, message, notif_type='general')
         email_sent = send_email_notification(getattr(recipient, 'email', None), title, message)
         sms_sent = send_sms_notification(getattr(recipient, 'phone', None), f"{title}: {message}")
     except Exception:
-        # Do not let delivery failures break the request flow
+        # Does not let delivery failures break the request flow
         email_sent = sms_sent = False
 
 def add_audit(complaint, actor, action, prev_status='', new_status='', notes=''):
@@ -40,12 +43,12 @@ def dashboard(request):
         return render(request, 'complaints/dashboard.html', {
             'complaints': [], 'stats': {}, 'unread_count': 0
         })
-    if user.is_student:
-        complaints = Complaint.objects.filter(student=user)[:5]
+    if user.is_facility_user:
+        complaints = Complaint.objects.filter(submitter=user)[:5]
         stats = {
-            'total':    Complaint.objects.filter(student=user).count(),
-            'open':     Complaint.objects.filter(student=user).exclude(status__in=['Resolved','Closed']).count(),
-            'resolved': Complaint.objects.filter(student=user, status='Resolved').count(),
+            'total':    Complaint.objects.filter(submitter=user).count(),
+            'open':     Complaint.objects.filter(submitter=user).exclude(status__in=['Resolved','Closed']).count(),
+            'resolved': Complaint.objects.filter(submitter=user, status='Resolved').count(),
         }
     elif user.is_staff_member:
         complaints = Complaint.objects.filter(assigned_to=user)[:5]
@@ -71,7 +74,7 @@ def dashboard(request):
 def complaints_list(request):
     user = request.user
     qs = Complaint.objects.all()
-    if user.is_student:      qs = qs.filter(student=user)
+    if user.is_facility_user:      qs = qs.filter(submitter=user)
     elif user.is_staff_member: qs = qs.filter(assigned_to=user)
     status_filter   = request.GET.get('status', '')
     category_filter = request.GET.get('category', '')
@@ -90,13 +93,13 @@ def complaints_list(request):
 
 @login_required
 def submit_complaint(request):
-    if not request.user.is_student:
-        messages.error(request, 'Only students can submit complaints.')
+    if not request.user.is_facility_user:
+        messages.error(request, 'Only facility users can submit complaints.')
         return redirect('dashboard')
     form = SubmitComplaintForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         complaint = form.save(commit=False)
-        complaint.student = request.user
+        complaint.submitter = request.user
         complaint.save()
         for f in request.FILES.getlist('media'):
             ComplaintMedia.objects.create(complaint=complaint, file=f, original_name=f.name)
@@ -112,7 +115,7 @@ def submit_complaint(request):
 def complaint_detail(request, pk):
     complaint = get_object_or_404(Complaint, pk=pk)
     user      = request.user
-    if user.is_student and complaint.student != user:
+    if user.is_facility_user and complaint.submitter != user:
         messages.error(request, 'You are not authorised to view this complaint.')
         return redirect('complaints_list')
     staff_qs    = User.objects.filter(role='staff', is_active=True)
@@ -132,7 +135,7 @@ def complaint_detail(request, pk):
                     complaint.resolved_at = timezone.now()
                 complaint.save()
                 add_audit(complaint, user, f'Status updated to {new}', prev, new, status_form.cleaned_data.get('notes',''))
-                add_notification(complaint.student, complaint, f'Complaint {complaint.complaint_id} Updated',
+                add_notification(complaint.submitter, complaint, f'Complaint {complaint.complaint_id} Updated',
                     f'Your complaint status changed from "{prev}" to "{new}".', 'status_update')
                 messages.success(request, f'Status updated to {new}.')
                 return redirect('complaint_detail', pk=pk)
@@ -147,7 +150,7 @@ def complaint_detail(request, pk):
                 complaint.status = 'Assigned'
                 complaint.save()
                 add_audit(complaint, user, f'Assigned to {staff.get_full_name()}', prev, 'Assigned', notes)
-                add_notification(complaint.student, complaint, 'Complaint Assigned',
+                add_notification(complaint.submitter, complaint, 'Complaint Assigned',
                     f'Your complaint {complaint.complaint_id} has been assigned to {staff.department}.', 'assignment')
                 add_notification(staff, complaint, 'New Complaint Assigned',
                     f'Complaint {complaint.complaint_id} ({complaint.category}) assigned to you.', 'assignment')
@@ -169,8 +172,8 @@ def complaint_detail(request, pk):
         ('Category',      complaint.category),
         ('Location',      complaint.location),
         ('Building',      complaint.building or '—'),
-        ('Submitted By',  complaint.student.get_full_name()),
-        ('Student ID',    complaint.student.student_id or '—'),
+        ('Submitted By',  complaint.submitter.get_full_name()),
+        ('Facility User ID',    complaint.submitter.facility_id or '—'),
         ('Date Submitted',complaint.created_at.strftime('%d %b %Y, %H:%M')),
         ('Assigned To',   complaint.assigned_to.get_full_name() if complaint.assigned_to else 'Unassigned'),
         ('Department',    complaint.assigned_dept or '—'),
@@ -191,20 +194,106 @@ def admin_dashboard(request):
     if not request.user.is_admin:
         messages.error(request, 'Access denied.')
         return redirect('dashboard')
-    by_status   = list(Complaint.objects.values('status').annotate(count=Count('id')))
-    by_category = list(Complaint.objects.values('category').annotate(count=Count('id')).order_by('-count'))
+    # Build base queryset and apply optional filters from GET params
+    qs = Complaint.objects.all()
+    status_filter = request.GET.get('status', '')
+    start = request.GET.get('start_date', '')
+    end = request.GET.get('end_date', '')
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    # parse dates in YYYY-MM-DD format
+    try:
+        if start:
+            start_dt = datetime.strptime(start, '%Y-%m-%d')
+            qs = qs.filter(created_at__gte=start_dt)
+        if end:
+            # include the whole end day
+            end_dt = datetime.strptime(end, '%Y-%m-%d')
+            end_dt = end_dt.replace(hour=23, minute=59, second=59)
+            qs = qs.filter(created_at__lte=end_dt)
+    except Exception:
+        # ignore parse errors and continue with unfiltered dates
+        pass
+
+    by_status = list(qs.values('status').annotate(count=Count('id')))
+    by_category = list(qs.values('category').annotate(count=Count('id')).order_by('-count'))
     stats = {
-        'total':       Complaint.objects.count(),
-        'submitted':   Complaint.objects.filter(status='Submitted').count(),
-        'in_progress': Complaint.objects.filter(status='In Progress').count(),
-        'resolved':    Complaint.objects.filter(status='Resolved').count(),
-        'closed':      Complaint.objects.filter(status='Closed').count(),
-        'escalated':   Complaint.objects.filter(is_escalated=True).count(),
+        'total':       qs.count(),
+        'submitted':   qs.filter(status='Submitted').count(),
+        'in_progress': qs.filter(status='In Progress').count(),
+        'resolved':    qs.filter(status='Resolved').count(),
+        'closed':      qs.filter(status='Closed').count(),
+        'escalated':   qs.filter(is_escalated=True).count(),
     }
+    statuses = [c[0] for c in Complaint.STATUS_CHOICES]
     return render(request, 'complaints/admin_dashboard.html', {
         'stats': stats, 'by_status': by_status, 'by_category': by_category,
         'unread_count': Notification.objects.filter(recipient=request.user, is_read=False).count(),
+        'statuses': statuses,
+        'status_filter': status_filter,
+        'start_date': start,
+        'end_date': end,
     })
+
+
+@login_required
+def admin_export_complaints_csv(request):
+    """Export all complaints as a CSV file for admin analytics page."""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied.')
+        return redirect('dashboard')
+
+    # Apply same filters as admin dashboard (status, date range)
+    qs = Complaint.objects.select_related('submitter', 'assigned_to').prefetch_related('media_files', 'audit_logs')
+    status_filter = request.GET.get('status', '')
+    start = request.GET.get('start_date', '')
+    end = request.GET.get('end_date', '')
+    if status_filter:
+        qs = qs.filter(status=status_filter)
+    try:
+        if start:
+            start_dt = datetime.strptime(start, '%Y-%m-%d')
+            qs = qs.filter(created_at__gte=start_dt)
+        if end:
+            end_dt = datetime.strptime(end, '%Y-%m-%d')
+            end_dt = end_dt.replace(hour=23, minute=59, second=59)
+            qs = qs.filter(created_at__lte=end_dt)
+    except Exception:
+        pass
+
+    fieldnames = [
+        'complaint_id', 'submitter_username', 'submitter_email', 'category', 'priority',
+        'location', 'building', 'status', 'assigned_to', 'assigned_dept',
+        'is_escalated', 'created_at', 'resolved_at', 'resolution_notes', 'media_count', 'audit_count'
+    ]
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=complaints_analytics_export.csv'
+
+    writer = csv.DictWriter(response, fieldnames=fieldnames)
+    writer.writeheader()
+
+    for c in qs:
+        writer.writerow({
+            'complaint_id': c.complaint_id,
+            'submitter_username': getattr(c.submitter, 'username', ''),
+            'submitter_email': getattr(c.submitter, 'email', ''),
+            'category': c.category,
+            'priority': c.priority,
+            'location': c.location,
+            'building': c.building,
+            'status': c.status,
+            'assigned_to': getattr(c.assigned_to, 'username', '') if c.assigned_to else '',
+            'assigned_dept': c.assigned_dept,
+            'is_escalated': c.is_escalated,
+            'created_at': c.created_at.isoformat() if c.created_at else '',
+            'resolved_at': c.resolved_at.isoformat() if c.resolved_at else '',
+            'resolution_notes': c.resolution_notes,
+            'media_count': c.media_files.count(),
+            'audit_count': c.audit_logs.count(),
+        })
+
+    return response
 
 @login_required
 def notifications_view(request):

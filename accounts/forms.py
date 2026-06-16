@@ -2,23 +2,24 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import User
 
-class StudentRegistrationForm(UserCreationForm):
+class FacilityUserRegistrationForm(UserCreationForm):
     first_name = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={'placeholder': 'First name'}))
     last_name  = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
     email      = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'placeholder': 'you@university.edu.gh'}))
-    student_id = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'placeholder': 'e.g. UG0574822'}))
+    facility_id = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'placeholder': 'e.g. UG0574822'}))
     phone      = forms.CharField(max_length=20, required=False, widget=forms.TextInput(attrs={'placeholder': '+233 XX XXX XXXX'}))
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'student_id', 'phone', 'password1', 'password2']
+        fields = ['first_name', 'last_name', 'username', 'email', 'facility_id', 'phone', 'password1', 'password2']
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email      = self.cleaned_data['email']
-        user.student_id = self.cleaned_data.get('student_id', '')
+        user.facility_id = self.cleaned_data.get('facility_id', '')
         user.phone      = self.cleaned_data.get('phone', '')
-        user.role       = 'student'
+        # new default role for self-registering users is 'facility' (facility users)
+        user.role       = 'facility'
         if commit:
             user.save()
         return user

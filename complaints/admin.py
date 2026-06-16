@@ -7,7 +7,7 @@ from .models import Complaint, ComplaintMedia, AuditLog, Notification
 def export_complaints_as_csv(modeladmin, request, queryset):
     """Admin action to export selected complaints as a CSV file."""
     fieldnames = [
-        'complaint_id', 'student_username', 'student_email', 'category', 'priority',
+        'complaint_id', 'submitter_username', 'submitter_email', 'category', 'priority',
         'location', 'building', 'status', 'assigned_to', 'assigned_dept',
         'is_escalated', 'created_at', 'resolved_at', 'resolution_notes', 'media_count', 'audit_count'
     ]
@@ -18,11 +18,11 @@ def export_complaints_as_csv(modeladmin, request, queryset):
     writer = csv.DictWriter(response, fieldnames=fieldnames)
     writer.writeheader()
 
-    for c in queryset.select_related('student', 'assigned_to').prefetch_related('media_files', 'audit_logs'):
+    for c in queryset.select_related('submitter', 'assigned_to').prefetch_related('media_files', 'audit_logs'):
         writer.writerow({
             'complaint_id': c.complaint_id,
-            'student_username': getattr(c.student, 'username', ''),
-            'student_email': getattr(c.student, 'email', ''),
+            'submitter_username': getattr(c.submitter, 'username', ''),
+            'submitter_email': getattr(c.submitter, 'email', ''),
             'category': c.category,
             'priority': c.priority,
             'location': c.location,
@@ -46,7 +46,7 @@ export_complaints_as_csv.short_description = 'Export selected complaints to CSV'
 
 @admin.register(Complaint)
 class ComplaintAdmin(admin.ModelAdmin):
-    list_display = ('complaint_id', 'category', 'priority', 'status', 'student', 'assigned_to', 'created_at')
+    list_display = ('complaint_id', 'category', 'priority', 'status', 'submitter', 'assigned_to', 'created_at')
     list_filter = ('category', 'priority', 'status', 'is_escalated')
-    search_fields = ('complaint_id', 'student__username', 'location', 'description')
+    search_fields = ('complaint_id', 'submitter__username', 'location', 'description')
     actions = [export_complaints_as_csv]

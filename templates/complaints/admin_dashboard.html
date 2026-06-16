@@ -41,7 +41,22 @@
     <div class="card border-0 shadow-sm">
       <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
         <span class="fw-semibold">All Complaints</span>
-        <a href="{% url 'complaints_list' %}" class="btn btn-outline-primary btn-sm">View Full List</a>
+        <div class="d-flex gap-2 align-items-center">
+          <form id="filtersForm" method="get" class="d-flex gap-2 align-items-center">
+            <select id="statusSelect" name="status" class="form-select form-select-sm">
+              <option value="">All statuses</option>
+              {% for s in statuses %}
+              <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date }}" />
+            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date }}" />
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Apply</button>
+            <div id="filterError" class="text-danger small ms-2" role="alert" aria-live="polite"></div>
+          </form>
+          <a href="{% url 'complaints_list' %}" class="btn btn-outline-primary btn-sm">View Full List</a>
+          <a id="exportCsvBtn" href="{% url 'admin_export_complaints' %}?{{ request.GET.urlencode }}" class="btn btn-primary btn-sm">Export CSV</a>
+        </div>
       </div>
     </div>
   </div>
@@ -81,4 +96,52 @@
     }
   });
 </script>
+  <script>
+    // Client-side validation for analytics filters: ensure start_date <= end_date
+    (function(){
+      const form = document.getElementById('filtersForm');
+      const exportBtn = document.getElementById('exportCsvBtn');
+      const errorEl = document.getElementById('filterError');
+      if (!form) return;
+
+      function parseDateVal(val){
+        if (!val) return null;
+        // yyyy-mm-dd
+        const parts = val.split('-');
+        if (parts.length !== 3) return null;
+        return new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+      }
+
+      function validate(){
+        const start = form.querySelector('input[name="start_date"]').value;
+        const end = form.querySelector('input[name="end_date"]').value;
+        const s = parseDateVal(start);
+        const e = parseDateVal(end);
+        if (s && e && s > e){
+          errorEl.textContent = 'Start date must be before or equal to end date.';
+          return false;
+        }
+        errorEl.textContent = '';
+        return true;
+      }
+
+      form.addEventListener('submit', function(ev){
+        if (!validate()){
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+      });
+
+      if (exportBtn){
+        exportBtn.addEventListener('click', function(ev){
+          if (!validate()){
+            ev.preventDefault();
+            ev.stopPropagation();
+            // visually focus the error
+            errorEl.focus && errorEl.focus();
+          }
+        });
+      }
+    })();
+  </script>
 {% endblock %}

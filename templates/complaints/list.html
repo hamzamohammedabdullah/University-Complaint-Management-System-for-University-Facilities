@@ -7,7 +7,7 @@
     <h4 class="fw-bold mb-0">Complaints</h4>
     <p class="text-muted small mb-0">{{ complaints|length }} complaint(s) found</p>
   </div>
-  {% if user.is_student %}
+  {% if user.is_facility_user %}
   <a href="{% url 'submit_complaint' %}" class="btn btn-primary">
     <i class="bi bi-plus-circle me-1"></i> New Complaint
   </a>
@@ -61,7 +61,7 @@
       <thead class="table-light">
         <tr>
           <th class="small text-uppercase text-muted fw-semibold">ID</th>
-          {% if not user.is_student %}<th class="small text-uppercase text-muted fw-semibold">Student</th>{% endif %}
+          {% if not user.is_facility_user %}<th class="small text-uppercase text-muted fw-semibold">Facility User</th>{% endif %}
           <th class="small text-uppercase text-muted fw-semibold">Category</th>
           <th class="small text-uppercase text-muted fw-semibold">Location</th>
           <th class="small text-uppercase text-muted fw-semibold">Priority</th>
@@ -74,10 +74,10 @@
         {% for c in complaints %}
         <tr>
           <td><code class="small bg-light px-2 py-1 rounded">{{ c.complaint_id }}</code></td>
-          {% if not user.is_student %}
+          {% if not user.is_facility_user %}
           <td>
-            <div class="small fw-semibold">{{ c.student.get_full_name }}</div>
-            <div class="small text-muted">{{ c.student.student_id }}</div>
+            <div class="small fw-semibold">{{ c.submitter.get_full_name }}</div>
+            <div class="small text-muted">{{ c.submitter.facility_id }}</div>
           </td>
           {% endif %}
           <td class="small">{{ c.category }}</td>
@@ -95,7 +95,7 @@
   <div class="card-body text-center py-5">
     <i class="bi bi-inbox text-muted" style="font-size:40px;"></i>
     <p class="text-muted mt-2 mb-0">No complaints found</p>
-    {% if user.is_student %}
+    {% if user.is_facility_user %}
     <a href="{% url 'submit_complaint' %}" class="btn btn-primary btn-sm mt-3">Submit a complaint</a>
     {% endif %}
   </div>

@@ -2,13 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import StudentRegistrationForm, LoginForm, CreateStaffForm
+from .forms import FacilityUserRegistrationForm, LoginForm, CreateStaffForm
 from .models import User
 
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
-    form = StudentRegistrationForm(request.POST or None)
+    form = FacilityUserRegistrationForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         user = form.save()
         login(request, user)

@@ -3,7 +3,7 @@ from django.db import models
 
 class User(AbstractUser):
     ROLE_CHOICES = [
-        ('student', 'Student'),
+        ('facility', 'Facility User'),
         ('staff',   'Facilities Staff'),
         ('admin',   'Administrator'),
     ]
@@ -16,8 +16,8 @@ class User(AbstractUser):
         ('Security',          'Security'),
     ]
 
-    role       = models.CharField(max_length=20, choices=ROLE_CHOICES, default='student')
-    student_id = models.CharField(max_length=50, blank=True)
+    role       = models.CharField(max_length=20, choices=ROLE_CHOICES, default='facility')
+    facility_id = models.CharField(max_length=50, blank=True)
     department = models.CharField(max_length=50, choices=DEPARTMENT_CHOICES, blank=True)
     phone      = models.CharField(max_length=20, blank=True)
     is_active  = models.BooleanField(default=True)
@@ -26,7 +26,12 @@ class User(AbstractUser):
         return f"{self.get_full_name()} ({self.role})"
 
     @property
-    def is_student(self): return self.role == 'student'
+    def is_student(self):
+        # kept for backward compatibility in codebase; maps to facility users
+        return self.role == 'facility'
+    @property
+    def is_facility_user(self):
+        return self.role == 'facility'
     @property
     def is_staff_member(self): return self.role == 'staff'
     @property

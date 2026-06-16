@@ -51,7 +51,7 @@
     <a href="{% url 'complaints_list' %}" class="nav-link {% if 'complaint' in request.resolver_match.url_name %}active{% endif %}">
       <i class="bi bi-file-earmark-text"></i> Complaints
     </a>
-    {% if user.is_student %}
+    {% if user.is_facility_user %}
     <a href="{% url 'submit_complaint' %}" class="nav-link">
       <i class="bi bi-plus-circle"></i> Submit Complaint
     </a>
@@ -65,7 +65,7 @@
     </a>
     {% endif %}
     {# Link to Django's built-in admin site for superusers #}
-    {% if user.is_superuser %}
+    {% if user.is_superuser and user.is_admin %}
     <a href="{% url 'admin:index' %}" class="nav-link">
       <i class="bi bi-shield-lock"></i> Django Admin
     </a>
@@ -78,7 +78,7 @@
   <div class="sidebar-footer">
     <div style="color:#94a3b8; font-size:12px; margin-bottom:8px;">
       <strong style="color:#fff;">{{ user.get_full_name|default:user.username }}</strong><br>
-      <span style="text-transform:capitalize;">{{ user.role }}</span>
+      <span style="text-transform:capitalize;">{{ user.get_role_display }}</span>
     </div>
     <a href="{% url 'logout' %}" class="btn btn-sm btn-outline-secondary w-100" style="color:#94a3b8; border-color:rgba(255,255,255,.2);">
       <i class="bi bi-box-arrow-right"></i> Sign Out

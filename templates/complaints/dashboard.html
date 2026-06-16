@@ -9,7 +9,7 @@
 
 <!-- Stats -->
 <div class="row g-3 mb-4">
-  {% if user.is_student %}
+  {% if user.is_facility_user %}
   <div class="col-md-4">
     <div class="stat-card">
       <div class="stat-lbl">My Complaints</div>
@@ -83,8 +83,8 @@
   {% endif %}
 </div>
 
-<!-- Quick action for students -->
-{% if user.is_student %}
+<!-- Quick action for facility users -->
+{% if user.is_facility_user %}
 <div class="mb-4">
   <a href="{% url 'submit_complaint' %}" class="btn btn-primary">
     <i class="bi bi-plus-circle me-1"></i> Submit New Complaint
@@ -129,7 +129,7 @@
   <div class="card-body text-center py-5">
     <i class="bi bi-file-earmark-text text-muted" style="font-size:40px;"></i>
     <p class="text-muted mt-2 mb-0">No complaints yet</p>
-    {% if user.is_student %}
+    {% if user.is_facility_user %}
     <a href="{% url 'submit_complaint' %}" class="btn btn-primary btn-sm mt-3">Submit your first complaint</a>
     {% endif %}
   </div>

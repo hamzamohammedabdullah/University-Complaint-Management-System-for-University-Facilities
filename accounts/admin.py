@@ -8,16 +8,16 @@ class UserAdmin(BaseUserAdmin):
     """Admin for the custom User model.
 
     Extends Django's built-in UserAdmin to show the extra fields defined
-    on the project's User model (role, student_id, department, phone).
+    on the project's User model (role, facility_id (facility user id), department, phone).
     """
     fieldsets = BaseUserAdmin.fieldsets + (
-        ("Additional info", {"fields": ("role", "student_id", "department", "phone")} ),
+        ("Additional info", {"fields": ("role", "facility_id", "department", "phone")} ),
     )
 
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        (None, {"fields": ("role", "student_id", "department", "phone")} ),
+        (None, {"fields": ("role", "facility_id", "department", "phone")} ),
     )
 
     list_display = ("username", "email", "get_full_name", "role", "is_staff", "is_active")
     list_filter = ("role", "is_staff", "is_active")
-    search_fields = ("username", "email", "student_id")
+    search_fields = ("username", "email", "facility_id")

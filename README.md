@@ -70,7 +70,7 @@ Open your browser at **http://127.0.0.1:8000** 🎉
 
 | Role      | How to create                               | What they can do                              |
 |-----------|---------------------------------------------|-----------------------------------------------|
-| `student` | Self-register at `/accounts/register/`      | Submit, track and view own complaints         |
+| `facility` | Self-register at `/accounts/register/`      | Submit, track and view own complaints         |
 | `staff`   | Admin creates via Manage Users page         | View assigned complaints, update status       |
 | `admin`   | Via `createsuperuser` command               | Full access — assign, analytics, manage users |
 
@@ -87,14 +87,14 @@ To create staff accounts:
 |----------------------------|-------------------------|--------------|
 | `/`                        | Redirect to dashboard   | Private      |
 | `/accounts/login/`         | Login page              | Public       |
-| `/accounts/register/`      | Student registration    | Public       |
+| `/accounts/register/`      | Facility user registration    | Public       |
 | `/accounts/logout/`        | Sign out                | Private      |
 | `/accounts/profile/`       | My profile              | Private      |
 | `/accounts/users/`         | Manage users            | Admin only   |
 | `/accounts/users/create/`  | Create staff/admin      | Admin only   |
 | `/dashboard/`              | Dashboard               | Private      |
 | `/complaints/`             | List all complaints     | Private      |
-| `/complaints/new/`         | Submit a complaint      | Student only |
+| `/complaints/new/`         | Submit a complaint      | Facility users only |
 | `/complaints/<id>/`        | Complaint detail        | Private      |
 | `/admin-panel/`            | Analytics dashboard     | Admin only   |
 | `/notifications/`          | My notifications        | Private      |
@@ -149,7 +149,7 @@ Submitted → Under Review → Assigned → In Progress → Resolved → Closed
 
 - Django's built-in CSRF protection on all forms
 - Session-based authentication
-- Role-based access control (student / staff / admin)
+- Role-based access control (facility / staff / admin)
 - Password hashing via Django's PBKDF2 algorithm
 - File upload type and size validation
 - Login required on all private pages

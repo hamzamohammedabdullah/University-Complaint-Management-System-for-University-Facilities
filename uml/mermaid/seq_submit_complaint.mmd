@@ -1,15 +1,15 @@
 sequenceDiagram
-    actor Student
+    actor FacilityUser
     participant Browser
     participant Server
     participant DB
     participant Storage
 
-    Student->>Browser: open /complaints/submit
+    FacilityUser->>Browser: open /complaints/submit
     Browser->>Server: GET /complaints/submit
     Server-->>Browser: render SubmitComplaintForm
 
-    Student->>Browser: fill form + attach files
+    FacilityUser->>Browser: fill form + attach files
     Browser->>Server: POST /complaints/submit
     Server->>Server: validate form
     alt valid

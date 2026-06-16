@@ -11,7 +11,7 @@
         <small class="text-muted">University Complaint Management System</small>
       </div>
       <h5 class="fw-bold mb-1">Create Account</h5>
-      <p class="text-muted small mb-4">Register as a student to submit facility complaints</p>
+      <p class="text-muted small mb-4">Register as a facility user to submit facility complaints</p>
 
       <form method="post" novalidate>
         {% csrf_token %}
@@ -31,8 +31,8 @@
             {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
           </div>
           <div class="col-6">
-            <label class="form-label fw-semibold small">Student ID</label>
-            <input type="text" name="student_id" class="form-control" placeholder="UG0574822" value="{{ form.student_id.value|default:'' }}" />
+            <label class="form-label fw-semibold small">Facility User ID</label>
+            <input type="text" name="facility_id" class="form-control" placeholder="UG0574822" value="{{ form.facility_id.value|default:'' }}" />
           </div>
           <div class="col-12">
             <label class="form-label fw-semibold small">University Email *</label>

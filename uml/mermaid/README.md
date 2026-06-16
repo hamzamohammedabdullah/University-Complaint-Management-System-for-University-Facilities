@@ -7,6 +7,8 @@ Files:
 - `seq_*.mmd` — sequence diagrams for login, register, submit complaint, notifications
 - `components.mmd` — component diagram
 - `usecases.mmd` — use-case flowchart
+ - `usecases.mmd` — use-case flowchart
+ - `usecases_facility_user.mmd` — facility user use-case flowchart (formerly usecases_student)
 - `dataflow.mmd` — dataflow diagram
 - `complaint_lifecycle.mmd` — statechart for complaint lifecycle
 
