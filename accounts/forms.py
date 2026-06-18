@@ -28,6 +28,17 @@ class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': '••••••••'}))
 
+
+class AltLoginForm(AuthenticationForm):
+    """Alternative login form that includes a role dropdown.
+
+    The role is not required to authenticate, but we enforce that the
+    selected role matches the authenticated user's `role` property.
+    """
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': '••••••••'}))
+    role = forms.ChoiceField(choices=User.ROLE_CHOICES, required=True, widget=forms.Select())
+
 class CreateStaffForm(UserCreationForm):
     first_name = forms.CharField(max_length=50, required=True)
     last_name  = forms.CharField(max_length=50, required=True)

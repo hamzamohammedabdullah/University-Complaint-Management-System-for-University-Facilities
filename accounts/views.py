@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import FacilityUserRegistrationForm, LoginForm, CreateStaffForm
+from .forms import FacilityUserRegistrationForm, LoginForm, CreateStaffForm, AltLoginForm
 from .models import User
 
 def register_view(request):
@@ -26,6 +26,28 @@ def login_view(request):
         messages.success(request, f'Welcome back, {user.first_name or user.username}!')
         return redirect(request.GET.get('next', 'dashboard'))
     return render(request, 'accounts/login.html', {'form': form})
+
+
+def alt_login_view(request):
+    """Alternative login page with a role dropdown.
+
+    Does not replace the existing login. If the selected role does not
+    match the authenticated user's role, the login is rejected with
+    a form error.
+    """
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    form = AltLoginForm(request, data=request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        user = form.get_user()
+        selected_role = form.cleaned_data.get('role')
+        if selected_role and user.role != selected_role:
+            form.add_error(None, 'Selected role does not match this account.')
+        else:
+            login(request, user)
+            messages.success(request, f'Welcome back, {user.first_name or user.username}!')
+            return redirect(request.GET.get('next', 'dashboard'))
+    return render(request, 'accounts/login_alt.html', {'form': form})
 
 def logout_view(request):
     logout(request)
