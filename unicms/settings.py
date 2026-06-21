@@ -82,3 +82,8 @@ LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+# Default passwords used when staff/admin or facility users are created by staff
+# Change these in production to secure values and rotate as needed.
+DEFAULT_FACILITY_PASSWORD = 'ChangeMe123!'
+DEFAULT_STAFF_ADMIN_PASSWORD = 'AdminChangeMe123!'

@@ -56,7 +56,55 @@ class Complaint(models.Model):
             count = Complaint.objects.count() + 1
             year  = timezone.now().year
             self.complaint_id = f"CMS-{count:04d}-{year}"
+        # Auto-classify priority for new complaints if not explicitly set
+        if not hasattr(self, 'pk') or self.pk is None:
+            try:
+                self.priority = self.classify_priority()
+            except Exception:
+                # Fail-safe: keep default priority if classifier errors
+                pass
         super().save(*args, **kwargs)
+
+    def classify_priority(self):
+        """Basic heuristic to classify complaint priority from category and description.
+
+        Rules (simple keyword matching):
+        - Urgent: mentions injury, fire, gas leak, collapse, electrocution, severe danger
+        - High: major service outage (power, water), flooding, sewage, security breach
+        - Medium: default
+        - Low: minor issues (cosmetic, minor repairs)
+        """
+        desc = (self.description or '').lower()
+        category = (self.category or '').lower()
+
+        urgent_keywords = ['fire', 'electrocution', 'gas leak', 'explosion', 'bleeding', 'injury', 'collapse', 'structural', 'unsafe', 'danger', 'trapped']
+        high_keywords = ['no power', 'power outage', 'flood', 'sewage', 'blocked', 'major leak', 'water leak', 'broken elevator', 'elevator stuck', 'security breach', 'break-in', 'intruder', 'smoke']
+        low_keywords = ['painting', 'cosmetic', 'loose', 'minor', 'slow', 'squeak', 'noise']
+
+        # Urgent by explicit words in description
+        for kw in urgent_keywords:
+            if kw in desc:
+                return 'Urgent'
+
+        # High by explicit words
+        for kw in high_keywords:
+            if kw in desc:
+                return 'High'
+
+        # Category-based boosting
+        if 'security' in category:
+            # security issues are at least High
+            return 'High'
+        if 'electrical' in category and any(word in desc for word in ['shock', 'sparks', 'smoke', 'short circuit']):
+            return 'Urgent'
+
+        # Low if matches low keywords
+        for kw in low_keywords:
+            if kw in desc:
+                return 'Low'
+
+        # Default
+        return 'Medium'
 
     @property
     def status_badge(self):

@@ -19,10 +19,7 @@
           {% if form.category.errors %}<div class="text-danger small">{{ form.category.errors.0 }}</div>{% endif %}
         </div>
 
-        <div class="col-md-6">
-          <label class="form-label fw-semibold small">Priority</label>
-          {{ form.priority }}
-        </div>
+        {# Priority is auto-classified by the system; users no longer select it #}
 
         <div class="col-md-6">
           <label class="form-label fw-semibold small">Building / Block</label>

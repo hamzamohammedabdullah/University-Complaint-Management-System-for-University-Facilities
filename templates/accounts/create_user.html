@@ -33,33 +33,13 @@
         </div>
         <div class="col-6">
           <label class="form-label fw-semibold small">Role *</label>
-          <select name="role" class="form-select" id="role-select">
-            <option value="staff">Facilities Staff</option>
-            <option value="admin">Administrator</option>
-          </select>
+          {{ form.role }}
         </div>
         <div class="col-6" id="dept-field">
           <label class="form-label fw-semibold small">Department</label>
-          <select name="department" class="form-select">
-            <option value="">— Select —</option>
-            <option>Electrical</option>
-            <option>Plumbing</option>
-            <option>ICT Infrastructure</option>
-            <option>General Maintenance</option>
-            <option>Sanitation</option>
-            <option>Security</option>
-          </select>
+          {{ form.department }}
         </div>
-        <div class="col-6">
-          <label class="form-label fw-semibold small">Password *</label>
-          <input type="password" name="password1" class="form-control" required>
-          {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors.0 }}</div>{% endif %}
-        </div>
-        <div class="col-6">
-          <label class="form-label fw-semibold small">Confirm Password *</label>
-          <input type="password" name="password2" class="form-control" required>
-          {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors.0 }}</div>{% endif %}
-        </div>
+        <!-- Passwords are set to a default value; no input required here -->
       </div>
       <div class="d-flex gap-2 mt-4">
         <button type="submit" class="btn btn-primary fw-semibold">Create Account</button>
@@ -70,8 +50,11 @@
 </div>
 
 <script>
-  document.getElementById('role-select').addEventListener('change', function() {
-    document.getElementById('dept-field').style.display = this.value === 'staff' ? 'block' : 'none';
-  });
+  const roleSelect = document.querySelector('[name="role"]');
+  if (roleSelect) {
+    roleSelect.addEventListener('change', function() {
+      document.getElementById('dept-field').style.display = this.value === 'staff' ? 'block' : 'none';
+    });
+  }
 </script>
 {% endblock %}

@@ -4,10 +4,11 @@ from .models import Complaint
 class SubmitComplaintForm(forms.ModelForm):
     class Meta:
         model  = Complaint
-        fields = ['category', 'priority', 'building', 'location', 'description']
+        # priority is now auto-classified; remove it from the public form
+        fields = ['category', 'building', 'location', 'description']
         widgets = {
             'category':    forms.Select(attrs={'class': 'form-select'}),
-            'priority':    forms.Select(attrs={'class': 'form-select'}),
+            # priority widget removed
             'building':    forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Engineering Block A'}),
             'location':    forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Room 204, Lab 3, Male Washroom'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Describe the issue in detail...'}),

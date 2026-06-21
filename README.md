@@ -77,7 +77,7 @@ Open your browser at **http://127.0.0.1:8000** 🎉
 To create staff accounts:
 1. Log in as admin
 2. Go to **Manage Users → Add User**
-3. Set role to "Facilities Staff" and pick a department
+3. Set role to "Maintenance Staff" and pick a department
 
 ---
 
