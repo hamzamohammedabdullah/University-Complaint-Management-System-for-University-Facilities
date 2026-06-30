@@ -41,7 +41,11 @@ class AltLoginForm(AuthenticationForm):
     """
     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': '••••••••'}))
-    role = forms.ChoiceField(choices=User.ROLE_CHOICES, required=True, widget=forms.Select())
+    role = forms.ChoiceField(
+        choices=[('', 'Select role')] + list(User.ROLE_CHOICES),
+        required=True,
+        widget=forms.Select(),
+    )
 
 class CreateStaffForm(forms.ModelForm):
     first_name = forms.CharField(max_length=50, required=True)

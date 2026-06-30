@@ -26,9 +26,13 @@
         </div>
         <div class="mb-3">
           <label class="form-label fw-semibold small">Role</label>
-          <select name="role" class="form-select">
+          <select name="role" class="form-select" required>
             {% for val,label in form.role.field.choices %}
-            <option value="{{ val }}" {% if form.role.value == val %}selected{% endif %}>{{ label }}</option>
+              {% if val == '' %}
+                <option value="" selected disabled hidden>Select role</option>
+              {% else %}
+                <option value="{{ val }}" {% if form.role.value == val %}selected{% endif %}>{{ label }}</option>
+              {% endif %}
             {% endfor %}
           </select>
         </div>

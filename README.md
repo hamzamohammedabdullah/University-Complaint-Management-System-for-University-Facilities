@@ -7,7 +7,7 @@
 
 | Layer      | Technology              |
 |------------|-------------------------|
-| Backend    | Python + Django 4.2     |
+| Backend    | Python + Django 6.0.3   |
 | Database   | SQLite (built-in)       |
 | Frontend   | HTML + Bootstrap 5      |
 | Charts     | Chart.js (CDN)          |
@@ -25,13 +25,15 @@
 
 ---
 
-### Step 1 — Install Django
+### Step 1 — Install dependencies
 
 Open a terminal inside the `unicms-django` folder and run:
 
 ```bash
 pip install -r requirements.txt
 ```
+
+Alternatively, for a one-click local setup on Windows, double-click `autorun.bat` in the project root. It will create a virtual environment, install the dependencies, run migrations, and start the application.
 
 ---
 
@@ -62,7 +64,13 @@ Enter a username, email, and password when prompted. This will be your admin log
 python manage.py runserver
 ```
 
-Open your browser at **http://127.0.0.1:8000** 🎉
+Open your browser at **http://127.0.0.1:8000** 
+
+### Quick launch with autorun
+
+- Double-click `autorun.bat` from the project root on a Windows machine.
+- The launcher will install dependencies, migrate the database, run checks, and open the app locally.
+- You can also read the simple instructions in `README_AUTORUN.txt`.
 
 ---
 
@@ -70,14 +78,21 @@ Open your browser at **http://127.0.0.1:8000** 🎉
 
 | Role      | How to create                               | What they can do                              |
 |-----------|---------------------------------------------|-----------------------------------------------|
-| `facility` | Self-register at `/accounts/register/`      | Submit, track and view own complaints         |
-| `staff`   | Admin creates via Manage Users page         | View assigned complaints, update status       |
+| `facility` | Self-register at `/accounts/register/` or by a Maintenance Staff/Admin in Manage Users | Submit, track and view own complaints         |
+| `staff`   | Admin or Maintenance Staff creates via Manage Users page | View assigned complaints, update status       |
 | `admin`   | Via `createsuperuser` command               | Full access — assign, analytics, manage users |
 
 To create staff accounts:
 1. Log in as admin
 2. Go to **Manage Users → Add User**
 3. Set role to "Maintenance Staff" and pick a department
+
+### Latest account-management updates
+- The main login page at `/accounts/login/` now uses the alternate role-based login flow with a required role dropdown.
+- Maintenance Staff and Administrators can create facility users directly from the Manage Users area.
+- Facility and staff/admin accounts are assigned a default temporary password automatically during creation.
+- Users receive an email with their temporary password, and first-time sign-ins trigger a reminder to update the password.
+- Administrators can import multiple facility-user accounts from an Excel file using the batch upload feature.
 
 ---
 
@@ -86,7 +101,8 @@ To create staff accounts:
 | URL                        | Page                    | Access       |
 |----------------------------|-------------------------|--------------|
 | `/`                        | Redirect to dashboard   | Private      |
-| `/accounts/login/`         | Login page              | Public       |
+| `/accounts/login/`         | Main login page with role selection | Public       |
+| `/accounts/alt-login/`     | Alias for the alternate login flow | Public       |
 | `/accounts/register/`      | Facility user registration    | Public       |
 | `/accounts/logout/`        | Sign out                | Private      |
 | `/accounts/profile/`       | My profile              | Private      |
@@ -155,6 +171,14 @@ Submitted → Under Review → Assigned → In Progress → Resolved → Closed
 - Login required on all private pages
 
 ---
+
+## Recent system updates
+
+- Role-based login is now the default sign-in experience.
+- The system supports batch creation of facility-user accounts from Excel uploads.
+- Temporary password assignment is automated for new accounts.
+- Password update reminders are sent on first login.
+- The project includes an autorun launcher for simple Windows startup.
 
 ## Future Enhancements (Chapter 5)
 

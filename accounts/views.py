@@ -63,11 +63,10 @@ def login_view(request):
 
 
 def alt_login_view(request):
-    """Alternative login page with a role dropdown.
+    """Main login page with a role dropdown.
 
-    Does not replace the existing login. If the selected role does not
-    match the authenticated user's role, the login is rejected with
-    a form error.
+    If the selected role does not match the authenticated user's role,
+    the login is rejected with a form error.
     """
     if request.user.is_authenticated:
         return redirect('dashboard')
